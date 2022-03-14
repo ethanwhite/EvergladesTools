@@ -137,14 +137,19 @@ def detect_nests(dirname, savedir):
 
     return filename
 
-def process_nests(nest_file, savedir, min_score=0.3, min_detections=3):
+def num_consec_detects(nest_data):
+    """Determine the maximum number of consecutive bird detections"""
+    
+
+
+def process_nests(nest_file, savedir, min_score=0.3, min_detects=3, min_consec_detects=2):
     """Process nests into a one row per nest table"""
     nests_data = geopandas.read_file(nest_file)
     target_inds = nests_data['target_ind'].unique()
     nests = []
     for target_ind in target_inds:
         nest_data = nests_data[(nests_data['target_ind'] == target_ind) & (nests_data['score'] >= min_score)]
-        if len(nest_data) >= min_detections:
+        if len(nest_data) >= min_detects:
             summed_scores = nest_data.groupby(['Site', 'Year', 'target_ind', 'label']).score.agg(['sum', 'count'])
             top_score_data = summed_scores[summed_scores['sum'] == max(summed_scores['sum'])].reset_index()
             nest_info = nest_data.groupby(['Site', 'Year', 'target_ind']).agg({'Date': ['min', 'max', 'count'], 
